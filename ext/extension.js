@@ -20,10 +20,8 @@ export default class FocusBurst extends Extension {
   enable() {
     // Initialize the Indicator and Core UI Components
     this._initializeUI();
-
     // PopupMenu: Add Control Buttons
     this._initControls();
-
     // PopupMenu: Add Input Fields
     this._initInputs();
 
@@ -96,7 +94,6 @@ export default class FocusBurst extends Extension {
       label: 'Start',
       style_class: 'control-button',
       x_expand: true
-
     });
     let stopButton = new St.Button({
       label: 'Stop',
@@ -149,6 +146,26 @@ export default class FocusBurst extends Extension {
       can_focus: true
     });
     input.clutter_text.set_text(defaultValue); // Set Default Value
+
+    let increment = labelText === 'Intervals' ? 1 : 5;
+
+    leftButton.connect('clicked', () => {
+      let currentValue = parseInt(input.clutter_text.get_text(), 10);
+      if (!isNaN(currentValue) && currentValue > increment) {
+        input.clutter_text.set_text(String(currentValue - increment));
+      } else if (!isNaN(currentValue) && currentValue >= 0) {
+        input.clutter_text.set_text('0');
+      }
+    });
+
+    rightButton.connect('clicked', () => {
+      let currentValue = parseInt(input.clutter_text.get_text(), 10);
+      if (!isNaN(currentValue) && currentValue + increment < 999) {
+        input.clutter_text.set_text(String(currentValue + increment));
+      } else if (!isNaN(currentValue)) {
+        input.clutter_text.set_text('999')
+      }
+    });
 
     let hbox = new St.BoxLayout({ style_class: 'input-container' });
     hbox.add_child(leftButton);
