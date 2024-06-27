@@ -1,10 +1,9 @@
 import St from 'gi://St';
-import Gio from 'gi://Gio';
 import Clutter from 'gi://Clutter';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import { initializeUI } from './ui/panelBar.js';
 
 export default class FocusBurst extends Extension {
   constructor(metadata) {
@@ -22,7 +21,7 @@ export default class FocusBurst extends Extension {
 
   enable() {
     // Initialize the Indicator and Core UI Components
-    this._initializeUI();
+    this._indicator = initializeUI(this.metadata);
     //PopupMenu: Add Timer
     this._initTimer();
     // PopupMenu: Add Control Buttons
@@ -34,49 +33,6 @@ export default class FocusBurst extends Extension {
     Main.panel.addToStatusArea(this.uuid, this._indicator);
 
     console.log('Enabled FocusBurst');
-  }
-
-  _initializeUI() {
-    // Create Panel Button
-    this._indicator = new PanelMenu.Button(0.0, this.metadata.name, false);
-    // Create Icon and Label
-    this._setupPanelBarIcon();
-  }
-
-  _setupPanelBarIcon() {
-    // Create Icon
-    let iconPath = `${this.path}/assets/logo.png`;
-    let gicon = Gio.icon_new_for_string(iconPath);
-    let iconSize = 14;
-
-    // Create Icon Widget
-    let icon = new St.Icon({
-      gicon: gicon,
-      style_class: 'system-status-icon',
-      icon_size: iconSize,
-      x_align: Clutter.ActorAlign.CENTER, // Center align horizontally
-      y_align: Clutter.ActorAlign.CENTER // Center align vertically
-    });
-
-    // Create Label (Text) Widget
-    let label = new St.Label({
-      text: 'FocusBurst',
-      style_class: 'panel-menu-label',
-      x_align: Clutter.ActorAlign.CENTER, // Center align horizontally
-      y_align: Clutter.ActorAlign.CENTER // Center align vertically
-    });
-
-    // Create Box Layout to Contain Icon and Label
-    let box = new St.BoxLayout({
-      style_class: 'panel-menu-box',
-      x_align: Clutter.ActorAlign.CENTER, // Center align horizontally
-      y_align: Clutter.ActorAlign.CENTER // Center align vertically
-    });
-    box.add_child(icon);
-    box.add_child(label);
-
-    // Add the box to the Panel Button
-    this._indicator.add_child(box);
   }
 
   _initTimer() {
