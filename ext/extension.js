@@ -4,6 +4,7 @@ import { initializeUI } from './ui/panelBarUI.js';
 import { initControlButtons } from './ui/controlsUI.js';
 import { initTimer } from './ui/timerUI.js';
 import { createInputFields } from './ui/inputUI.js';
+import { PomodoroTimer } from './pomodoro/pomodoroTimer.js'
 
 export default class FocusBurst extends Extension {
   constructor(metadata) {
@@ -13,6 +14,10 @@ export default class FocusBurst extends Extension {
     this._inputs = {};
     // Countdown Timer
     this._timerLabel = null;
+    this.currentSeconds = 0;
+    // Pomodoro
+    this.pomodoroTimer = new PomodoroTimer(this.setTimerDisplay.bind(this));
+
   }
 
   enable() {
@@ -25,7 +30,10 @@ export default class FocusBurst extends Extension {
     this._timerLabel = timerLabel;
 
     // PopupMenu: Add Control Buttons
-    let controls = initControlButtons();
+    let controls = initControlButtons(
+      () => this.pomodoroTimer.start(),
+      () => this.pomodoroTimer.stop()
+    );
     this._indicator.menu.addMenuItem(controls)
 
     // PopupMenu: Add Input Fields
@@ -34,15 +42,22 @@ export default class FocusBurst extends Extension {
     // Add the Indicator to the GNOME Shell panel
     Main.panel.addToStatusArea(this.uuid, this._indicator);
 
+    //
+    const timerSettings = this.getInputValue();
+    this.pomodoroTimer.workDuration = timerSettings['Work'] * 60;
+    this.pomodoroTimer.shortBreakDuration = timerSettings['Short Break'] * 60;
+    this.pomodoroTimer.longBreakDuration = timerSettings['Long Break'] * 60;
+    this.pomodoroTimer.intervalsBeforeLongBreak = timerSettings['Intervals'];
+
     console.log('Enabled FocusBurst');
   }
 
   _initInputs() {
     const inputConfiguration = [
     { label: 'Intervals', default: '4', increment: 1 },
-    { label: 'Work', default: '50', increment: 5 },
-    { label: 'Short Break', default: '10', increment: 5 },
-    { label: 'Long Break', default: '20', increment: 5 },
+    { label: 'Work', default: '25', increment: 5 },
+    { label: 'Short Break', default: '5', increment: 5 },
+    { label: 'Long Break', default: '15', increment: 5 },
     ]
 
     inputConfiguration.forEach(config => {
@@ -53,16 +68,16 @@ export default class FocusBurst extends Extension {
   }
 
   getInputValue() {
-    return Object.keys(this._inputs).reduce((values, key) => {
-      values[key] = this._inputs[key].clutter_text.get_text();
-      return values;
-    }, {});
+    return {
+        'Work': parseInt(this._inputs['Work'].clutter_text.get_text(), 10),
+        'Short-Break': parseInt(this._inputs['Short-Break'].clutter_text.get_text(), 10),
+        'Long-Break': parseInt(this._inputs['Long-Break'].clutter_text.get_text(), 10),
+        'Intervals': parseInt(this._inputs['Intervals'].clutter_text.get_text(), 10)
+    };
   }
 
-  setTimerValue(newTime) {
-    if (this._timerLabel){
+  setTimerDisplay(newTime) {
       this.timerLabel.set_text(this._timerLabel);
-    }
   }
 
   disable() {
