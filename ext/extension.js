@@ -4,6 +4,8 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import { initializeUI } from './ui/panelBar.js';
+import { initControlButtons } from './ui/controls.js';
+import { initTimer } from './ui/timer.js';
 
 export default class FocusBurst extends Extension {
   constructor(metadata) {
@@ -15,17 +17,22 @@ export default class FocusBurst extends Extension {
     this._shortBreakInput = null;
     this._longBreakInput = null;
     // Countdown Timer
-    this._timer = null;
-    this.currentTime = '00:00';
+    this._timerlabel = null;
   }
 
   enable() {
     // Initialize the Indicator and Core UI Components
     this._indicator = initializeUI(this.metadata);
+
     //PopupMenu: Add Timer
-    this._initTimer();
+    let { timerMenu, timerLabel } = initTimer();
+    this._indicator.menu.addMenuItem(timerMenu);
+    this._timerLabel = timerLabel;
+
     // PopupMenu: Add Control Buttons
-    this._initControls();
+    let controls = initControlButtons();
+    this._indicator.menu.addMenuItem(controls)
+
     // PopupMenu: Add Input Fields
     this._initInputs();
 
@@ -33,68 +40,6 @@ export default class FocusBurst extends Extension {
     Main.panel.addToStatusArea(this.uuid, this._indicator);
 
     console.log('Enabled FocusBurst');
-  }
-
-  _initTimer() {
-    let timer = new St.Label({
-      text: `${this.currentTime}`,
-      style_class: 'timer-label'
-    });
-
-    let timerMenu = new PopupMenu.PopupBaseMenuItem({ reactive: false });
-    timerMenu.add_child(timer);
-    this._indicator.menu.addMenuItem(timerMenu);
-    this['_timer'] = timer;
-  }
-
-  _initControls() {
-    // Create Outer Box for Centering
-    let outerBox = new St.BoxLayout({
-      style_class: 'control-buttons-outer',
-      vertical: false,
-      x_expand: true
-    });
-
-    // Create a horizontal box to hold both buttons
-    let controlsBox = new St.BoxLayout({
-      style_class: 'control-buttons',
-      vertical: false,
-      x_align: Clutter.ActorAlign.CENTER,
-    });
-
-    // Create Start and Stop buttons
-    let startButton = new St.Button({
-      label: 'Start',
-      style_class: 'control-button',
-      x_expand: true
-    });
-    let stopButton = new St.Button({
-      label: 'Stop',
-      style_class: 'control-button',
-      x_expand: true
-    });
-
-    // Connect signals
-    startButton.connect('clicked', () => {
-      console.log("Start button pressed");
-      // Implement Start functionality here
-    });
-
-    stopButton.connect('clicked', () => {
-      console.log("Stop button pressed");
-      // Implement Stop functionality here
-    });
-
-    // Add buttons to the horizontal box
-    controlsBox.add_child(startButton);
-    controlsBox.add_child(stopButton);
-
-    outerBox.add_child(controlsBox);
-
-    // Add the box to the menu as a menu item
-    let controlsMenu = new PopupMenu.PopupBaseMenuItem({ reactive: false });
-    controlsMenu.add_child(outerBox);
-    this._indicator.menu.addMenuItem(controlsMenu);
   }
 
   _initInputs() {
@@ -161,12 +106,10 @@ export default class FocusBurst extends Extension {
     }
   }
 
-  getTimerValue() {
-    return this._timer ? this._timer.get_text() : '';
-  }
-
-  setTimerValue() {
-    this._timer.set_text(this.currentTime);
+  setTimerValue(newTime) {
+    if (this._timerLabel){
+      this.timerLabel.set_text(this._timerLabel);
+    }
   }
 
   disable() {
