@@ -54,7 +54,7 @@ export default class FocusBurst extends Extension {
     // this._menu = new PopupMenu.PopupMenu(this._indicator, 0.0, St.Side.BOTTOM);
 
     // Add Menu Items
-    // Interval
+    // Intervals
     let intervalsMenu = new PopupMenu.PopupBaseMenuItem({ reactive: false });
     let intervalsLabel = new St.Label({
       text: 'Intervals',
@@ -65,29 +65,56 @@ export default class FocusBurst extends Extension {
       style_class: 'intervals-input-box',
       can_focus: true
     });
+    intervalsInput.clutter_text.set_text('4'); // Set Default Value
     intervalsMenu.add_child(intervalsLabel);
     intervalsMenu.add_child(intervalsInput);
 
     // Work Time
-    const workTime = new PopupMenu.PopupMenuItem('Work Time');
-    workTime.connect('activate', () => {
-      console.log('activated WT');
+    let workMenu = new PopupMenu.PopupBaseMenuItem({ reactive: false });
+    let workLabel = new St.Label({
+      text: 'Work',
+      y_align: Clutter.ActorAlign.CENTER
     });
+    let workInput = new St.Entry({
+      name: 'workInput',
+      style_class: 'work-input-box',
+      can_focus: true
+    });
+    workMenu.add_child(workLabel);
+    workMenu.add_child(workInput);
+
     // Short Break Time
-    const shortBreakTime = new PopupMenu.PopupMenuItem('Short Break Time');
-    shortBreakTime.connect('activate', () => {
-      console.log('activated SBT');
+    let shortBreakMenu = new PopupMenu.PopupBaseMenuItem({ reactive: false });
+    let shortBreakLabel = new St.Label({
+      text: 'Short Break',
+      y_align: Clutter.ActorAlign.CENTER
     });
+    let shortBreakInput = new St.Entry({
+      name: 'shortBreakInput',
+      style_class: 'short-break-input-box',
+      can_focus: true
+    });
+    shortBreakMenu.add_child(shortBreakLabel);
+    shortBreakMenu.add_child(shortBreakInput);
+
     // Long Break Time
-    const longBreakTime = new PopupMenu.PopupMenuItem('Long Break Time');
-    longBreakTime.connect('activate', () => {
-      console.log('activated LBT');
+    let longBreakMenu = new PopupMenu.PopupBaseMenuItem({ reactive: false });
+    let longBreakLabel = new St.Label({
+      text: 'Long Break',
+      y_align: Clutter.ActorAlign.CENTER
     });
+    let longBreakInput = new St.Entry({
+      name: 'longBreakInput',
+      style_class: 'long-break-input-box',
+      can_focus: true
+    });
+    longBreakMenu.add_child(longBreakLabel);
+    longBreakMenu.add_child(longBreakInput);
 
     this._indicator.menu.addMenuItem(intervalsMenu);
-    this._indicator.menu.addMenuItem(workTime);
-    this._indicator.menu.addMenuItem(shortBreakTime);
-    this._indicator.menu.addMenuItem(longBreakTime);
+    this._indicator.menu.addMenuItem(workMenu);
+    this._indicator.menu.addMenuItem(shortBreakMenu);
+    this._indicator.menu.addMenuItem(longBreakMenu);
 
     // Add the indicator to the GNOME Shell panel
     Main.panel.addToStatusArea(this.uuid, this._indicator);
