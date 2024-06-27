@@ -10,7 +10,6 @@ export default class FocusBurst extends Extension {
   constructor(metadata) {
     super(metadata);
     this._indicator = null;
-    this._menu = null;
   }
 
   enable() {
@@ -56,10 +55,19 @@ export default class FocusBurst extends Extension {
 
     // Add Menu Items
     // Interval
-    const intervals = new PopupMenu.PopupMenuItem('Intervals');
-    intervals.connect('activate', () => {
-      console.log('activated Int');
+    let intervalsMenu = new PopupMenu.PopupBaseMenuItem({ reactive: false });
+    let intervalsLabel = new St.Label({
+      text: 'Intervals',
+      y_align: Clutter.ActorAlign.CENTER
     });
+    let intervalsInput = new St.Entry({
+      name: 'intervalsInput',
+      style_class: 'intervals-input-box',
+      can_focus: true
+    });
+    intervalsMenu.add_child(intervalsLabel);
+    intervalsMenu.add_child(intervalsInput);
+
     // Work Time
     const workTime = new PopupMenu.PopupMenuItem('Work Time');
     workTime.connect('activate', () => {
@@ -76,10 +84,10 @@ export default class FocusBurst extends Extension {
       console.log('activated LBT');
     });
 
-    this._indicator.menu.addMenuItem(intervals);;
+    this._indicator.menu.addMenuItem(intervalsMenu);
     this._indicator.menu.addMenuItem(workTime);
     this._indicator.menu.addMenuItem(shortBreakTime);
-    this._indicator.menu.addMenuItem(longBreakTime)
+    this._indicator.menu.addMenuItem(longBreakTime);
 
     // Add the indicator to the GNOME Shell panel
     Main.panel.addToStatusArea(this.uuid, this._indicator);
