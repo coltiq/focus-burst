@@ -179,6 +179,15 @@ export default class FocusBurst extends Extension {
     this[storageProperty] = input;
   }
 
+  getInputValue() {
+    return {
+      intevals: this._intervalsInput ? this._intervalsInput.clutter_text.get_text() : '',
+      work: this._workInput ? this._workInput.clutter_text.get_text() : '',
+      shortBreak: this._shortBreakInput ? this._shortBreakInput.clutter_text.get_text() : '',
+      longBreak: this._longBreakInput ? this._longBreakInput.clutter_text.get_text() : ''
+    }
+  }
+
   disable() {
     this._indicator?.destroy();
     this._indicator = null;
