@@ -52,17 +52,34 @@ export default class FocusBurst extends Extension {
     this._indicator.add_child(box);
 
     // Create a Dropdown Menu
-    this._menu = new PopupMenu.PopupMenu(this._indicator, 0.0, St.Side.BOTTOM);
+    // this._menu = new PopupMenu.PopupMenu(this._indicator, 0.0, St.Side.BOTTOM);
 
     // Add Menu Items
-    const workTime = new PopupMenu.PopupMenuSection();
-    workTime.addAction('Work Time', () => console.log('activated'));
-    this._menu.addMenuItem(workTime);
-
-    // Connect Signal to show Menu on Button Click
-    this._indicator.connect('button-press-event', () => {
-      this._menu.toggle();
+    // Interval
+    const intervals = new PopupMenu.PopupMenuItem('Intervals');
+    intervals.connect('activate', () => {
+      console.log('activated Int');
     });
+    // Work Time
+    const workTime = new PopupMenu.PopupMenuItem('Work Time');
+    workTime.connect('activate', () => {
+      console.log('activated WT');
+    });
+    // Short Break Time
+    const shortBreakTime = new PopupMenu.PopupMenuItem('Short Break Time');
+    shortBreakTime.connect('activate', () => {
+      console.log('activated SBT');
+    });
+    // Long Break Time
+    const longBreakTime = new PopupMenu.PopupMenuItem('Long Break Time');
+    longBreakTime.connect('activate', () => {
+      console.log('activated LBT');
+    });
+
+    this._indicator.menu.addMenuItem(intervals);;
+    this._indicator.menu.addMenuItem(workTime);
+    this._indicator.menu.addMenuItem(shortBreakTime);
+    this._indicator.menu.addMenuItem(longBreakTime)
 
     // Add the indicator to the GNOME Shell panel
     Main.panel.addToStatusArea(this.uuid, this._indicator);
