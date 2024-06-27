@@ -18,9 +18,26 @@ export default class FocusBurst extends Extension {
   }
 
   enable() {
-    // Create a panel button
-    this._indicator = new PanelMenu.Button(0.0, this.metadata.name, false);
+    // Initialize the Indicator and Core UI Components
+    this._initializeUI();
 
+    // PopupMenu: Add Input Fields
+    this._initInputs()
+
+    // Add the Indicator to the GNOME Shell panel
+    Main.panel.addToStatusArea(this.uuid, this._indicator);
+
+    console.log('Enabled FocusBurst');
+  }
+
+  _initializeUI() {
+    // Create Panel Button
+    this._indicator = new PanelMenu.Button(0.0, this.metadata.name, false);
+    // Create Icon and Label
+    this._setupPanelBarIcon();
+  }
+
+  _setupPanelBarIcon() {
     // Create Icon
     let iconPath = `${this.path}/assets/logo.png`;
     let gicon = Gio.icon_new_for_string(iconPath);
@@ -52,16 +69,8 @@ export default class FocusBurst extends Extension {
     box.add_child(icon);
     box.add_child(label);
 
-    // Add the box to the PanelMenu button
+    // Add the box to the Panel Button
     this._indicator.add_child(box);
-
-    // PopupMenu: Add Input Fields and their Labels
-    this._initInputs()
-
-    // Add the indicator to the GNOME Shell panel
-    Main.panel.addToStatusArea(this.uuid, this._indicator);
-
-    console.log('Enabled FocusBurst');
   }
 
   _initInputs() {
@@ -90,9 +99,6 @@ export default class FocusBurst extends Extension {
   }
 
   disable() {
-    this._menu?.destroy();
-    this._menu = null;
-
     this._indicator?.destroy();
     this._indicator = null;
 
