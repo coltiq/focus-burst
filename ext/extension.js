@@ -16,8 +16,8 @@ export default class FocusBurst extends Extension {
     this._shortBreakInput = null;
     this._longBreakInput = null;
     // Countdown Timer
-    this._minutes = null;
-    this._seconds = null;
+    this._timer = null;
+    this.currentTime = '00:00';
   }
 
   enable() {
@@ -81,13 +81,14 @@ export default class FocusBurst extends Extension {
 
   _initTimer() {
     let timer = new St.Label({
-      text: '00:00',
+      text: `${this.currentTime}`,
       style_class: 'timer-label'
     });
 
     let timerMenu = new PopupMenu.PopupBaseMenuItem({ reactive: false });
     timerMenu.add_child(timer);
     this._indicator.menu.addMenuItem(timerMenu);
+    this['_timer'] = timer;
   }
 
   _initControls() {
@@ -202,6 +203,14 @@ export default class FocusBurst extends Extension {
       shortBreak: this._shortBreakInput ? this._shortBreakInput.clutter_text.get_text() : '',
       longBreak: this._longBreakInput ? this._longBreakInput.clutter_text.get_text() : ''
     }
+  }
+
+  getTimerValue() {
+    return this._timer ? this._timer.get_text() : '';
+  }
+
+  setTimerValue() {
+    this._timer.set_text(this.currentTime);
   }
 
   disable() {
