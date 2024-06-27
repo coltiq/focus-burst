@@ -1,12 +1,9 @@
-import St from 'gi://St';
-import Clutter from 'gi://Clutter';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
-import { initializeUI } from './ui/panelBar.js';
-import { initControlButtons } from './ui/controls.js';
-import { initTimer } from './ui/timer.js';
-import { createInputFields } from './ui/input.js';
+import { initializeUI } from './ui/panelBarUI.js';
+import { initControlButtons } from './ui/controlsUI.js';
+import { initTimer } from './ui/timerUI.js';
+import { createInputFields } from './ui/inputUI.js';
 
 export default class FocusBurst extends Extension {
   constructor(metadata) {
@@ -15,7 +12,7 @@ export default class FocusBurst extends Extension {
     // References to Input Fields
     this._inputs = {};
     // Countdown Timer
-    this._timerlabel = null;
+    this._timerLabel = null;
   }
 
   enable() {
