@@ -15,11 +15,16 @@ export default class FocusBurst extends Extension {
     this._workInput = null;
     this._shortBreakInput = null;
     this._longBreakInput = null;
+    // Countdown Timer
+    this._minutes = null;
+    this._seconds = null;
   }
 
   enable() {
     // Initialize the Indicator and Core UI Components
     this._initializeUI();
+    //PopupMenu: Add Timer
+    this._initTimer();
     // PopupMenu: Add Control Buttons
     this._initControls();
     // PopupMenu: Add Input Fields
@@ -72,6 +77,17 @@ export default class FocusBurst extends Extension {
 
     // Add the box to the Panel Button
     this._indicator.add_child(box);
+  }
+
+  _initTimer() {
+    let timer = new St.Label({
+      text: '00:00',
+      style_class: 'timer-label'
+    });
+
+    let timerMenu = new PopupMenu.PopupBaseMenuItem({ reactive: false });
+    timerMenu.add_child(timer);
+    this._indicator.menu.addMenuItem(timerMenu);
   }
 
   _initControls() {
