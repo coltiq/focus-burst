@@ -17,7 +17,6 @@ export default class FocusBurst extends Extension {
     this.currentSeconds = 0;
     // Pomodoro
     this.pomodoroTimer = new PomodoroTimer(this.setTimerDisplay.bind(this));
-
   }
 
   enable() {
@@ -30,10 +29,19 @@ export default class FocusBurst extends Extension {
     this._timerLabel = timerLabel;
 
     // PopupMenu: Add Control Buttons
-    let controls = initControlButtons(
-      () => this.pomodoroTimer.start(),
-      () => this.pomodoroTimer.stop()
-    );
+    const onStart = () => {
+      console.log('onStart triggered');
+      this.pomodoroTimer.start();
+    };    
+    const onStop = () => {
+      console.log('onStop triggered');
+      this.pomodoroTimer.stop();
+    };
+    const onReset = () => {
+      console.log('onReset triggered');
+      this.resetTimer();
+    }
+    let controls = initControlButtons(onStart, onStop, onReset);
     this._indicator.menu.addMenuItem(controls)
 
     // PopupMenu: Add Input Fields
@@ -77,7 +85,17 @@ export default class FocusBurst extends Extension {
   }
 
   setTimerDisplay(newTime) {
-      this.timerLabel.set_text(this._timerLabel);
+      this._timerLabel.set_text(newTime);
+  }
+
+  resetTimer() {
+    const timerSettings = this.getInputValue(); 
+    this.pomodoroTimer.reset(
+        timerSettings['Work'],
+        timerSettings['Short-Break'],
+        timerSettings['Long-Break'],
+        timerSettings['Intervals']
+    );
   }
 
   disable() {

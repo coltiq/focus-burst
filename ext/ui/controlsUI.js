@@ -2,7 +2,7 @@ import St from 'gi://St';
 import Clutter from 'gi://Clutter';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
-export function initControlButtons(onStart, onStop) {
+export function initControlButtons(onStart, onStop, onReset) {
   // Create Outer Box for Centering
   let outerBox = new St.BoxLayout({
     style_class: 'control-buttons-outer',
@@ -28,21 +28,32 @@ export function initControlButtons(onStart, onStop) {
     style_class: 'control-button',
     x_expand: true
   });
+  let resetButton = new St.Button({
+    label: 'Reset',
+    style_class: 'control-button',
+    x_expand: true
+  });
 
   // Connect signals
   startButton.connect('clicked', () => {
     console.log("Start button pressed");
-    onStart
+    onStart();
   });
 
   stopButton.connect('clicked', () => {
     console.log("Stop button pressed");
-    onStop
+    onStop();
+  });
+
+  resetButton.connect('clicked', () => {
+    console.log("Reset button pressed");
+    onReset();
   });
 
   // Add buttons to the horizontal box
   controlsBox.add_child(startButton);
   controlsBox.add_child(stopButton);
+  controlsBox.add_child(resetButton);
 
   // Add horizontal box it the outer box
   outerBox.add_child(controlsBox);
