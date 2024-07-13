@@ -1,0 +1,9 @@
+{
+  "name": "FocusBurst",
+  "description": "Pomodoro Timer",
+  "uuid": "focus-burst@coltiq.com",
+  "shell-version": ["46"],
+  "url": "https://github.com/coltiq/focus-burst",
+  "gettext-domain": "focus-burst",
+  "settings-schema": "org.gnome.shell.extensions.focus-burst"
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.focus-burst" path="/org/gnome/shell/extensions/focus-burst/">
+    <key name="work-duration" type="i">
+      <default>25</default>
+      <summary>Work duration in minutes</summary>
+      <description>The duration of a work session in minutes.</description>
+    </key>
+    <key name="short-break-duration" type="i">
+      <default>5</default>
+      <summary>Short break duration in minutes</summary>
+      <description>The duration of a short break in minutes.</description>
+    </key>
+    <key name="long-break-duration" type="i">
+      <default>15</default>
+      <summary>Long break duration in minutes</summary>
+      <description>The duration of a long break in minutes.</description>
+    </key>
+    <key name="intervals-before-long-break" type="i">
+      <default>4</default>
+      <summary>Intervals before a long break</summary>
+      <description>The number of work sessions before a long break.</description>
+    </key>
+  </schema>
+</schemalist>
