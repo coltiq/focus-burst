@@ -4,6 +4,9 @@
   "description": "PanelMenu timer using the Pomodoro Technique",
   "shell-version": [ "46" ],
   "url": "https://github.com/coltiq/focus-burst",
+  "stylesheets": ["stylesheet.css"],
+  "settings-schema": "org.gnome.shell.extensions.focus-burst",
+  "preferences": "prefs.js",
   "donations": {
     "github": "coltiq"
   },

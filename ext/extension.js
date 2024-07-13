@@ -1,10 +1,12 @@
+import Gio from 'gi://Gio';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { initializeUI } from './ui/panelBarUI.js';
 import { initControlButtons } from './ui/controlsUI.js';
-import { initTimer } from './ui/timerUI.js';
+import { initStateDisplay } from './ui/stateUI.js';
 import { createInputFields } from './ui/inputUI.js';
 import { PomodoroTimer } from './pomodoro/pomodoroTimer.js'
+import Preferences, { init as initPrefs } from './prefs.js';
 
 export default class FocusBurst extends Extension {
   constructor(metadata) {
@@ -13,20 +15,22 @@ export default class FocusBurst extends Extension {
     // References to Input Fields
     this._inputs = {};
     // Countdown Timer
-    this._timerLabel = null;
+    this._stateLabel = null;
     this.currentSeconds = 0;
+    // Settings
+    this.settings = new Preferences() 
     // Pomodoro
-    this.pomodoroTimer = new PomodoroTimer(this.setTimerDisplay.bind(this));
+    this.pomodoroTimer = new PomodoroTimer(this.setTimerDisplay.bind(this), this.setStateDisplay.bind(this));
   }
 
   enable() {
     // Initialize the Indicator and Core UI Components
     this._indicator = initializeUI(this.metadata);
 
-    //PopupMenu: Add Timer
-    let { timerMenu, timerLabel } = initTimer();
-    this._indicator.menu.addMenuItem(timerMenu);
-    this._timerLabel = timerLabel;
+    //PopupMenu: Add State Display
+    let { stateMenu, stateLabel } = initStateDisplay();
+    this._indicator.menu.addMenuItem(stateMenu);
+    this._stateLabel = stateLabel;
 
     // PopupMenu: Add Control Buttons
     const onStart = () => {
@@ -51,11 +55,10 @@ export default class FocusBurst extends Extension {
     Main.panel.addToStatusArea(this.uuid, this._indicator);
 
     //
-    const timerSettings = this.getInputValue();
-    this.pomodoroTimer.workDuration = timerSettings['Work'] * 60;
-    this.pomodoroTimer.shortBreakDuration = timerSettings['Short Break'] * 60;
-    this.pomodoroTimer.longBreakDuration = timerSettings['Long Break'] * 60;
-    this.pomodoroTimer.intervalsBeforeLongBreak = timerSettings['Intervals'];
+    this.pomodoroTimer.workDuration = this.settings.get_int('work-duration') * 60;
+    this.pomodoroTimer.shortBreakDuration = this.settings.get_int('short-break-duration') * 60;
+    this.pomodoroTimer.longBreakDuration = this.settings.get_int('long-break-duration') * 60;
+    this.pomodoroTimer.intervalsBeforeLongBreak = this.settings.get_int('intervals-before-long-break');
 
     console.log('Enabled FocusBurst');
   }
@@ -84,8 +87,17 @@ export default class FocusBurst extends Extension {
     };
   }
 
-  setTimerDisplay(newTime) {
-      this._timerLabel.set_text(newTime);
+  setTimerDisplay(newTime, state) {
+    this.updatePanelTitle(newTime);
+  }
+
+  setStateDisplay(state) {
+    this._stateLabel.set_text(state);
+  }
+
+  updatePanelTitle(newTitle) {
+    const label = this._indicator.get_child_at_index(0)
+    label.get_child_at_index(1).set_text(newTitle)
   }
 
   resetTimer() {

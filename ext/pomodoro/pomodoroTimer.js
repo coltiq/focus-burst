@@ -1,6 +1,7 @@
 export class PomodoroTimer {
-    constructor(updateCallback) {
+    constructor(updateCallback, updateStateCallback) {
         this.updateCallback = updateCallback;
+        this.updateStateCallback = updateStateCallback;
         this.currentSeconds = 0;
         this.intervalCount = 0;
         this.state = 'STOPPED';  // 'WORK', 'SHORT_BREAK', 'LONG_BREAK', 'STOPPED'
@@ -15,6 +16,7 @@ export class PomodoroTimer {
         if (this.state === 'STOPPED') {
             this.state = 'WORK';
             this.currentSeconds = this.workDuration;  // Reset to work duration only if stopped
+            this.updateStateCallback(this.state);
         }
         if (!this.timer) {  // Check if timer is not already running
             this.timer = setInterval(() => this.tick(), 1000);
@@ -28,7 +30,8 @@ export class PomodoroTimer {
             this.timer = null;  // Clear the interval ID
             console.log('Timer paused...');
         }
-    }
+    } 
+
     reset(work, shortBreak, longBreak, intervals) {
         this.workDuration = work * 60; // Convert minutes to seconds
         this.shortBreakDuration = shortBreak * 60;
@@ -38,7 +41,8 @@ export class PomodoroTimer {
         this.intervalCount = 0; // Reset interval count
         this.state = 'STOPPED'; // Reset the state to start from a work period
         this.stop(); // Stop any existing timer
-        this.updateCallback(this.formatTime(this.currentSeconds)); // Update UI to Show Reset but 'STOPPED'
+        this.updateStateCallback("Get Shit Done!")
+        this.updateCallback("FocusBurst"); // Update UI to Show Reset but 'STOPPED'
     }
 
     tick() {
@@ -64,6 +68,7 @@ export class PomodoroTimer {
             this.state = 'WORK';
             this.currentSeconds = this.workDuration;
         }
+        this.updateStateCallback(this.state)
         this.updateCallback(this.formatTime(this.currentSeconds));
     }
 

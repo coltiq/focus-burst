@@ -20,17 +20,17 @@ export function initControlButtons(onStart, onStop, onReset) {
   // Create Start and Stop buttons
   let startButton = new St.Button({
     label: 'Start',
-    style_class: 'control-button',
+    style_class: 'control-button round-button',
     x_expand: true
   });
   let stopButton = new St.Button({
     label: 'Stop',
-    style_class: 'control-button',
+    style_class: 'control-button round-button',
     x_expand: true
   });
   let resetButton = new St.Button({
     label: 'Reset',
-    style_class: 'control-button',
+    style_class: 'control-button round-button',
     x_expand: true
   });
 
