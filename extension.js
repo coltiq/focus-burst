@@ -26,7 +26,7 @@ const FocusBurstMenuButton = GObject.registerClass(
 
       this.add_child(
         new St.Icon({
-          icon_name: "face-smile-symbolic",
+          icon_name: "alarm-symbolic",
           style_class: "focus-burst-icon",
         })
       );
@@ -35,9 +35,80 @@ const FocusBurstMenuButton = GObject.registerClass(
     }
 
     _initializeMenu() {
+      // Round Tracker
+      let roundTrackerContainer = new PopupMenu.PopupBaseMenuItem({
+        reactive: false,
+        style_class: "focus-burst-round-tracker-container",
+      });
+
+      let roundTrackerLabel = new St.Label({
+        text: _("Round 1"),
+        style_class: "focus-burst-round-tracker-label",
+        x_align: Clutter.ActorAlign.CENTER,
+        x_expand: true,
+      });
+      roundTrackerContainer.actor.add_child(roundTrackerLabel);
+
+      this.menu.addMenuItem(roundTrackerContainer);
+
+      // Control Section
+      let controlContainer = new PopupMenu.PopupBaseMenuItem({
+        reactive: false,
+        style_class: "focus-burst-menu-button-container",
+      });
+
+      let controlButtonBox = new St.BoxLayout({
+        style_class: "focus-burst-button-box",
+        vertical: false,
+        clip_to_allocation: true,
+        x_align: Clutter.ActorAlign.CENTER,
+        y_align: Clutter.ActorAlign.CENTER,
+        reactive: true,
+        x_expand: true,
+        pack_start: false,
+      });
+
+      // Play Button
+      let playButton = this._createRoundButton(
+        "media-playback-start-symbolic",
+        _("Play")
+      );
+      playButton.connect("clicked", (self) => {
+        Main.notify(_("Play Notification"), _("Play Button Clicked"));
+      });
+      controlButtonBox.add_child(playButton);
+
+      // Pause Button
+      let pauseButton = this._createRoundButton(
+        "media-playback-pause-symbolic",
+        _("Pause")
+      );
+      pauseButton.connect("clicked", (self) => {
+        Main.notify(_("Pause Notification"), _("Pause Button Clicked"));
+      });
+      controlButtonBox.add_child(pauseButton);
+
+      // Skip Button
+      let skipButton = this._createRoundButton(
+        "media-skip-forward-symbolic",
+        _("Play")
+      );
+      skipButton.connect("clicked", (self) => {
+        Main.notify(_("Skip Notification"), _("Skip Button Clicked"));
+      });
+      controlButtonBox.add_child(skipButton);
+
+      controlContainer.actor.add_child(controlButtonBox);
+
+      this.menu.addMenuItem(controlContainer);
+
       // Separator
       this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
+      // Separator
+      this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+      // Preferences Section
       let prefsContainer = new PopupMenu.PopupBaseMenuItem({
         reactive: false,
         style_class: "focus-burst-menu-button-container",
