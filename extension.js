@@ -31,6 +31,7 @@ const FocusBurstMenuButton = GObject.registerClass(
         })
       );
 
+      this.roundNumber = 0;
       this._initializeMenu();
     }
 
@@ -42,7 +43,7 @@ const FocusBurstMenuButton = GObject.registerClass(
       });
 
       let roundTrackerLabel = new St.Label({
-        text: _("Round 1"),
+        text: _("Be Productive!"),
         style_class: "focus-burst-round-tracker-label",
         x_align: Clutter.ActorAlign.CENTER,
         x_expand: true,
@@ -74,6 +75,10 @@ const FocusBurstMenuButton = GObject.registerClass(
         _("Play")
       );
       playButton.connect("clicked", (self) => {
+        if (this.roundNumber === 0) {
+          Main.notify(_("Play Notification"), _("Round 0 Click"));
+          this._onRoundChange();
+        }
         Main.notify(_("Play Notification"), _("Play Button Clicked"));
       });
       controlButtonBox.add_child(playButton);
@@ -104,6 +109,14 @@ const FocusBurstMenuButton = GObject.registerClass(
 
       // Separator
       this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+      // Time Tracker Section
+      let timerContainer = new PopupMenu.PopupBaseMenuItem({
+        reactive: false,
+        style_class: "focus-burst-timer-container",
+      });
+
+      this.menu.addMenuItem(timerContainer);
 
       // Separator
       this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -161,6 +174,18 @@ const FocusBurstMenuButton = GObject.registerClass(
       });
 
       return button;
+    }
+
+    _onRoundChange() {
+      this.roundNumber += 1;
+      this.roundTrackerLabel.set_text(_("Round ") + this.roundNumber);
+      this.roundTrackerLabel.style_changed();
+
+      //this.updateTimerContainer();
+    }
+
+    _updateTimerContainer() {
+      this.timerContainer.actor.destroy_all_children();
     }
   }
 );
