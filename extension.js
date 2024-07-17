@@ -119,6 +119,14 @@ const FocusBurstMenuButton = GObject.registerClass(
         style_class: "focus-burst-timer-container",
       });
 
+      this.timerBox = new St.BoxLayout({
+        vertical: true,
+        style_class: "focus-burst-timer-box",
+        x_expand: true,
+        x_align: Clutter.ActorAlign.FILL,
+      });
+
+      this.timerContainer.actor.add_child(this.timerBox);
       this.menu.addMenuItem(this.timerContainer);
 
       // Separator
@@ -187,12 +195,24 @@ const FocusBurstMenuButton = GObject.registerClass(
 
       let sequence = [];
       for (let i = 0; i < this.intervalsBeforeLongBreak; i++) {
-        sequence.push({ type: "work", duration: workDuration });
+        sequence.push({
+          type: "Work",
+          duration: workDuration,
+          icon: "emblem-system-symbolic",
+        });
         if (i < this.intervalsBeforeLongBreak - 1) {
-          sequence.push({ type: "break", duration: shortBreakDuration });
+          sequence.push({
+            type: "Short Break",
+            duration: shortBreakDuration,
+            icon: "media-playback-pause-symbolic",
+          });
         }
       }
-      sequence.push({ type: "longBreak", duration: longBreakDuration });
+      sequence.push({
+        type: "Long Break",
+        duration: longBreakDuration,
+        icon: "media-playback-start-symbolic",
+      });
 
       return sequence;
     }
@@ -201,11 +221,57 @@ const FocusBurstMenuButton = GObject.registerClass(
       this.roundNumber += 1;
       this.roundTrackerLabel.set_text(_("Round ") + this.roundNumber);
 
-      //this.updateTimerContainer();
+      this._updateTimerContainer();
     }
 
     _updateTimerContainer() {
-      this.timerContainer.actor.destroy_all_children();
+      this.timerBox.actor.destroy_all_children();
+      let startIndex = (this.roundNumber - 1) * 2;
+      let endIndex = startIndex + 2;
+
+      for (let i = startIndex; i < endIndex && i < this.sequence.length; i++) {
+        let item = this.sequence[i];
+
+        let itemBox = new St.BoxLayout({
+          vertical: false,
+          style_class: "focus-burst-timer-item",
+          x_expand: true,
+        });
+
+        let itemIcon = new St.Icon({
+          icon_name: item.icon,
+          style_class: "focus-burst-timer-icon",
+        });
+
+        let itemTypeLabel = new St.Label({
+          text: ` ${item.type} `,
+          style_class: "focus-burst-timer-type",
+          x_align: Clutter.ActorAlign.START,
+          x_expand: true,
+        });
+
+        let itemDurationLabel = new St.Label({
+          text: `${item.duration}:00`,
+          style_class: "focus-burst-timer-duration",
+          x_align: Clutter.ActorAlign.END,
+          x_expand: false,
+        });
+
+        itemBox.add_child(itemIcon);
+        itemBox.add_child(itemTypeLabel);
+        itemBox.add_child(itemDurationLabel);
+
+        this.timerBox.actor.add_child(itemBox);
+
+        if (i != endIndex - 1) {
+          // Add a spacer box for spacing between rows
+          let spacerBox = new St.BoxLayout({
+            style_class: "focus-burst-timer-spacer",
+            height: 10, // Adjust the height as needed
+          });
+          this.timerBox.actor.add_child(spacerBox);
+        }
+      }
     }
   }
 );

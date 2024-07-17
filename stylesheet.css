@@ -31,3 +31,14 @@
   padding: 0px;
   spacing: 22px;
 }
+
+.focus-burst-timer-icon {
+  icon-size: 16px;
+  color: white;
+}
+
+.focus-burst-timer-type,
+.focus-burst-timer-duration {
+  color: white;
+  font-size: 16px;
+}
