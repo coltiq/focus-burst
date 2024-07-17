@@ -28,6 +28,7 @@ const FocusBurstMenuButton = GObject.registerClass(
         "intervals-before-long-break"
       );
       this.sequence = this._getSequence();
+      this.durationLabels = [];
 
       this.add_child(
         new St.Icon({
@@ -226,6 +227,7 @@ const FocusBurstMenuButton = GObject.registerClass(
 
     _updateTimerContainer() {
       this.timerBox.actor.destroy_all_children();
+      this.durationLabels = []; // Clear the map when updating the container
       let startIndex = (this.roundNumber - 1) * 2;
       let endIndex = startIndex + 2;
 
@@ -256,6 +258,9 @@ const FocusBurstMenuButton = GObject.registerClass(
           x_align: Clutter.ActorAlign.END,
           x_expand: false,
         });
+
+        // Store reference to the duration label
+        this.durationLabels.push(itemDurationLabel);
 
         itemBox.add_child(itemIcon);
         itemBox.add_child(itemTypeLabel);
