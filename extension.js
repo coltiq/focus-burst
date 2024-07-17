@@ -23,6 +23,11 @@ const FocusBurstMenuButton = GObject.registerClass(
 
       this._extension = extensionObject;
       this._settings = extensionObject.getSettings();
+      this.roundNumber = 0;
+      this.intervalsBeforeLongBreak = this._settings.get_int(
+        "intervals-before-long-break"
+      );
+      this.sequence = this._getSequence();
 
       this.add_child(
         new St.Icon({
@@ -31,7 +36,6 @@ const FocusBurstMenuButton = GObject.registerClass(
         })
       );
 
-      this.roundNumber = 0;
       this._initializeMenu();
     }
 
@@ -42,13 +46,13 @@ const FocusBurstMenuButton = GObject.registerClass(
         style_class: "focus-burst-round-tracker-container",
       });
 
-      let roundTrackerLabel = new St.Label({
+      this.roundTrackerLabel = new St.Label({
         text: _("Be Productive!"),
         style_class: "focus-burst-round-tracker-label",
         x_align: Clutter.ActorAlign.CENTER,
         x_expand: true,
       });
-      roundTrackerContainer.actor.add_child(roundTrackerLabel);
+      roundTrackerContainer.actor.add_child(this.roundTrackerLabel);
 
       this.menu.addMenuItem(roundTrackerContainer);
 
@@ -76,7 +80,6 @@ const FocusBurstMenuButton = GObject.registerClass(
       );
       playButton.connect("clicked", (self) => {
         if (this.roundNumber === 0) {
-          Main.notify(_("Play Notification"), _("Round 0 Click"));
           this._onRoundChange();
         }
         Main.notify(_("Play Notification"), _("Play Button Clicked"));
@@ -111,12 +114,12 @@ const FocusBurstMenuButton = GObject.registerClass(
       this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
       // Time Tracker Section
-      let timerContainer = new PopupMenu.PopupBaseMenuItem({
+      this.timerContainer = new PopupMenu.PopupBaseMenuItem({
         reactive: false,
         style_class: "focus-burst-timer-container",
       });
 
-      this.menu.addMenuItem(timerContainer);
+      this.menu.addMenuItem(this.timerContainer);
 
       // Separator
       this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -176,10 +179,27 @@ const FocusBurstMenuButton = GObject.registerClass(
       return button;
     }
 
+    _getSequence() {
+      // Accessing this._settings within the method
+      let workDuration = this._settings.get_int("work-duration");
+      let shortBreakDuration = this._settings.get_int("short-break-duration");
+      let longBreakDuration = this._settings.get_int("long-break-duration");
+
+      let sequence = [];
+      for (let i = 0; i < this.intervalsBeforeLongBreak; i++) {
+        sequence.push({ type: "work", duration: workDuration });
+        if (i < this.intervalsBeforeLongBreak - 1) {
+          sequence.push({ type: "break", duration: shortBreakDuration });
+        }
+      }
+      sequence.push({ type: "longBreak", duration: longBreakDuration });
+
+      return sequence;
+    }
+
     _onRoundChange() {
       this.roundNumber += 1;
       this.roundTrackerLabel.set_text(_("Round ") + this.roundNumber);
-      this.roundTrackerLabel.style_changed();
 
       //this.updateTimerContainer();
     }
