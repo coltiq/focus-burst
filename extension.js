@@ -28,6 +28,7 @@ const FocusBurstMenuButton = GObject.registerClass(
         "intervals-before-long-break"
       );
       this.sequence = this._getSequence();
+      this.currentSequenceIndex = 0;
       this.durationLabels = [];
 
       this.add_child(
@@ -82,6 +83,7 @@ const FocusBurstMenuButton = GObject.registerClass(
       playButton.connect("clicked", (self) => {
         if (this.roundNumber === 0) {
           this._onRoundChange();
+          return;
         }
         Main.notify(_("Play Notification"), _("Play Button Clicked"));
       });
@@ -104,6 +106,13 @@ const FocusBurstMenuButton = GObject.registerClass(
       );
       skipButton.connect("clicked", (self) => {
         Main.notify(_("Skip Notification"), _("Skip Button Clicked"));
+        if (this.roundNumber === 0) {
+          return;
+        } else if (this.roundNumber <= this.intervalsBeforeLongBreak) {
+          this._onSequenceIndexChange();
+          return;
+        }
+        this._reset();
       });
       controlButtonBox.add_child(skipButton);
 
@@ -157,6 +166,7 @@ const FocusBurstMenuButton = GObject.registerClass(
       );
       refreshButton.connect("clicked", (self) => {
         Main.notify(_("Refresh Notification"), _("Refresh Button Clicked"));
+        this._reset();
       });
       customButtonBox.add_child(refreshButton);
 
@@ -186,6 +196,16 @@ const FocusBurstMenuButton = GObject.registerClass(
       });
 
       return button;
+    }
+
+    _reset() {
+      this.roundNumber = 0;
+      this.sequence = this._getSequence();
+      this.currentSequenceIndex = 0;
+      this.durationLabels = [];
+
+      this.menu.removeAll();
+      this._initializeMenu();
     }
 
     _getSequence() {
@@ -218,6 +238,21 @@ const FocusBurstMenuButton = GObject.registerClass(
       return sequence;
     }
 
+    _onSequenceIndexChange() {
+      this.currentSequenceIndex =
+        (this.currentSequenceIndex + 1) % this.sequence.length;
+
+      // Check if we need to change the round
+      if (this.currentSequenceIndex % 2 === 0) {
+        if (this.roundNumber >= this.intervalsBeforeLongBreak) {
+          this._reset();
+        } else {
+          this._onRoundChange();
+        }
+      }
+
+      this._updateTimerContainer();
+    }
     _onRoundChange() {
       this.roundNumber += 1;
       this.roundTrackerLabel.set_text(_("Round ") + this.roundNumber);
@@ -234,9 +269,13 @@ const FocusBurstMenuButton = GObject.registerClass(
       for (let i = startIndex; i < endIndex && i < this.sequence.length; i++) {
         let item = this.sequence[i];
 
+        let isCurrentSequence = i === this.currentSequenceIndex;
+
         let itemBox = new St.BoxLayout({
           vertical: false,
-          style_class: "focus-burst-timer-item",
+          style_class: isCurrentSequence
+            ? "focus-burst-timer-item-highlight"
+            : "focus-burst-timer-item",
           x_expand: true,
         });
 
@@ -247,7 +286,9 @@ const FocusBurstMenuButton = GObject.registerClass(
 
         let itemTypeLabel = new St.Label({
           text: ` ${item.type} `,
-          style_class: "focus-burst-timer-type",
+          style_class: isCurrentSequence
+            ? "focus-burst-timer-item-highlight"
+            : "focus-burst-timer-type",
           x_align: Clutter.ActorAlign.START,
           x_expand: true,
         });

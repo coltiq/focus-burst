@@ -34,11 +34,23 @@
 
 .focus-burst-timer-icon {
   icon-size: 16px;
-  color: white;
 }
 
 .focus-burst-timer-type,
 .focus-burst-timer-duration {
+  font-size: 16px;
+}
+
+.focus-burst-timer-item {
+  color: grey;
+}
+
+.focus-burst-timer-item-highlight {
   color: white;
   font-size: 16px;
+}
+
+.focus-burst-timer-icon,
+.focus-burst-timer-duration {
+  color: inherit;
 }
