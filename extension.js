@@ -163,7 +163,6 @@ const FocusBurstMenuButton = GObject.registerClass(
         _("Refresh")
       );
       refreshButton.connect("clicked", (self) => {
-        Main.notify(_("Refresh Notification"), _("Refresh Button Clicked"));
         this._reset();
       });
       customButtonBox.add_child(refreshButton);
