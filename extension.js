@@ -14,6 +14,7 @@ import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
 let focusBurstMenu;
 let timerId = null;
+let remainingDuration = null;
 
 const FocusBurstMenuButton = GObject.registerClass(
   {
@@ -41,6 +42,7 @@ const FocusBurstMenuButton = GObject.registerClass(
       );
 
       this._initializeMenu();
+      this._updateSeparatorVisibility();
     }
 
     _initializeMenu() {
@@ -121,7 +123,8 @@ const FocusBurstMenuButton = GObject.registerClass(
       this.menu.addMenuItem(controlContainer);
 
       // Separator
-      this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+      this.separator = new PopupMenu.PopupSeparatorMenuItem();
+      this.menu.addMenuItem(this.separator);
 
       // Time Tracker Section
       this.timerContainer = new PopupMenu.PopupBaseMenuItem({
@@ -241,6 +244,9 @@ const FocusBurstMenuButton = GObject.registerClass(
     _onSequenceIndexChange() {
       this.currentSequenceIndex =
         (this.currentSequenceIndex + 1) % this.sequence.length;
+      this._stopTimer();
+      remainingDuration =
+        this.sequence[this.currentSequenceIndex].duration * 60; // Reset remaining duration to new sequence duration
 
       // Check if we need to change the round
       if (this.currentSequenceIndex % 2 === 0) {
@@ -258,6 +264,7 @@ const FocusBurstMenuButton = GObject.registerClass(
       this.roundTrackerLabel.set_text(_("Round ") + this.roundNumber);
 
       this._updateTimerContainer();
+      this._updateSeparatorVisibility();
     }
 
     _updateTimerContainer() {
@@ -320,10 +327,25 @@ const FocusBurstMenuButton = GObject.registerClass(
       }
     }
 
+    _updateSeparatorVisibility() {
+      if (this.roundNumber === 0) {
+        this.separator.actor.hide();
+      } else {
+        this.separator.actor.show();
+      }
+    }
+
     _startTimer() {
-      this._stopTimer(); // Ensure any existing timer is stopped
+      if (timerId) {
+        return; // A timer is already running, so do nothing
+      }
+
       let currentDuration =
-        this.sequence[this.currentSequenceIndex].duration * 60;
+        remainingDuration !== null
+          ? remainingDuration
+          : this.sequence[this.currentSequenceIndex].duration * 60;
+      remainingDuration = null; // Clear remaining duration as the timer is starting
+
       timerId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
         currentDuration--;
         this._updateTimeDisplay(currentDuration);
@@ -340,7 +362,21 @@ const FocusBurstMenuButton = GObject.registerClass(
       if (timerId) {
         GLib.source_remove(timerId);
         timerId = null;
+        remainingDuration =
+          this.sequence[this.currentSequenceIndex].duration * 60 -
+          this._getElapsedTime(); // Calculate remaining duration
       }
+    }
+
+    _getElapsedTime() {
+      let elapsedTime = 0;
+      let durationText =
+        this.durationLabels[this.currentSequenceIndex % 2].text;
+      let [minutes, seconds] = durationText.split(":").map(Number);
+      elapsedTime =
+        this.sequence[this.currentSequenceIndex].duration * 60 -
+        (minutes * 60 + seconds);
+      return elapsedTime;
     }
 
     _updateTimeDisplay(currentDuration) {
