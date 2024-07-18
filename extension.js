@@ -1,6 +1,7 @@
 import Clutter from "gi://Clutter";
 import GObject from "gi://GObject";
 import St from "gi://St";
+import GLib from "gi://GLib";
 
 import {
   Extension,
@@ -12,6 +13,7 @@ import * as PopupMenu from "resource:///org/gnome/shell/ui/popupMenu.js";
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
 let focusBurstMenu;
+let timerId = null;
 
 const FocusBurstMenuButton = GObject.registerClass(
   {
@@ -54,7 +56,7 @@ const FocusBurstMenuButton = GObject.registerClass(
         x_align: Clutter.ActorAlign.CENTER,
         x_expand: true,
       });
-      roundTrackerContainer.actor.add_child(this.roundTrackerLabel);
+      roundTrackerContainer.add_child(this.roundTrackerLabel);
 
       this.menu.addMenuItem(roundTrackerContainer);
 
@@ -83,8 +85,8 @@ const FocusBurstMenuButton = GObject.registerClass(
       playButton.connect("clicked", (self) => {
         if (this.roundNumber === 0) {
           this._onRoundChange();
-          return;
         }
+        this._startTimer();
       });
       controlButtonBox.add_child(playButton);
 
@@ -94,7 +96,7 @@ const FocusBurstMenuButton = GObject.registerClass(
         _("Pause")
       );
       pauseButton.connect("clicked", (self) => {
-        Main.notify(_("Pause Notification"), _("Pause Button Clicked"));
+        this._stopTimer();
       });
       controlButtonBox.add_child(pauseButton);
 
@@ -114,7 +116,7 @@ const FocusBurstMenuButton = GObject.registerClass(
       });
       controlButtonBox.add_child(skipButton);
 
-      controlContainer.actor.add_child(controlButtonBox);
+      controlContainer.add_child(controlButtonBox);
 
       this.menu.addMenuItem(controlContainer);
 
@@ -178,7 +180,7 @@ const FocusBurstMenuButton = GObject.registerClass(
       });
       customButtonBox.add_child(prefsButton);
 
-      prefsContainer.actor.add_child(customButtonBox);
+      prefsContainer.add_child(customButtonBox);
 
       this.menu.addMenuItem(prefsContainer);
     }
@@ -196,6 +198,7 @@ const FocusBurstMenuButton = GObject.registerClass(
     }
 
     _reset() {
+      this._stopTimer();
       this.roundNumber = 0;
       this.sequence = this._getSequence();
       this.currentSequenceIndex = 0;
@@ -258,7 +261,7 @@ const FocusBurstMenuButton = GObject.registerClass(
     }
 
     _updateTimerContainer() {
-      this.timerBox.actor.destroy_all_children();
+      this.timerBox.destroy_all_children();
       this.durationLabels = []; // Clear the map when updating the container
       let startIndex = (this.roundNumber - 1) * 2;
       let endIndex = startIndex + 2;
@@ -304,7 +307,7 @@ const FocusBurstMenuButton = GObject.registerClass(
         itemBox.add_child(itemTypeLabel);
         itemBox.add_child(itemDurationLabel);
 
-        this.timerBox.actor.add_child(itemBox);
+        this.timerBox.add_child(itemBox);
 
         if (i != endIndex - 1) {
           // Add a spacer box for spacing between rows
@@ -312,9 +315,39 @@ const FocusBurstMenuButton = GObject.registerClass(
             style_class: "focus-burst-timer-spacer",
             height: 10, // Adjust the height as needed
           });
-          this.timerBox.actor.add_child(spacerBox);
+          this.timerBox.add_child(spacerBox);
         }
       }
+    }
+
+    _startTimer() {
+      this._stopTimer(); // Ensure any existing timer is stopped
+      let currentDuration =
+        this.sequence[this.currentSequenceIndex].duration * 60;
+      timerId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
+        currentDuration--;
+        this._updateTimeDisplay(currentDuration);
+        if (currentDuration <= 0) {
+          this._onSequenceIndexChange();
+          this._startTimer();
+          return GLib.SOURCE_REMOVE;
+        }
+        return GLib.SOURCE_CONTINUE;
+      });
+    }
+
+    _stopTimer() {
+      if (timerId) {
+        GLib.source_remove(timerId);
+        timerId = null;
+      }
+    }
+
+    _updateTimeDisplay(currentDuration) {
+      let minutes = Math.floor(currentDuration / 60);
+      let seconds = currentDuration % 60;
+      let timeText = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+      this.durationLabels[this.currentSequenceIndex % 2].set_text(timeText);
     }
   }
 );
