@@ -85,7 +85,6 @@ const FocusBurstMenuButton = GObject.registerClass(
           this._onRoundChange();
           return;
         }
-        Main.notify(_("Play Notification"), _("Play Button Clicked"));
       });
       controlButtonBox.add_child(playButton);
 
@@ -105,7 +104,6 @@ const FocusBurstMenuButton = GObject.registerClass(
         _("Play")
       );
       skipButton.connect("clicked", (self) => {
-        Main.notify(_("Skip Notification"), _("Skip Button Clicked"));
         if (this.roundNumber === 0) {
           return;
         } else if (this.roundNumber <= this.intervalsBeforeLongBreak) {
